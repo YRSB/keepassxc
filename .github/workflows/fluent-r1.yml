@@ -41,6 +41,7 @@ jobs:
         shell: pwsh
   full:
     runs-on: windows-2022
+    timeout-minutes: 90
     env:
       VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
       SCCACHE_GHA_ENABLED: "on"
@@ -70,6 +71,12 @@ jobs:
       - run: sccache --show-stats
         shell: pwsh
       - run: cmake --install build-full --config Release --prefix deploy
+      - run: Copy-Item build-full/vcpkg_installed/x64-windows/bin/*.dll deploy/
+        shell: pwsh
+      - run: |
+          $p = Start-Process deploy/keepassxc-cli.exe -ArgumentList '--version' -NoNewWindow -PassThru
+          if (-not $p.WaitForExit(60000)) { $p.Kill(); throw 'smoke test timed out' }
+          if ($p.ExitCode -ne 0) { throw "smoke test exit $($p.ExitCode)" }
         shell: pwsh
       - uses: actions/upload-artifact@v4
         with:
