@@ -7,6 +7,11 @@ on:
       - CMakeLists.txt
       - src/CMakeLists.txt
   workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   build:
     runs-on: windows-2022
@@ -22,6 +27,7 @@ jobs:
           host: windows
           target: desktop
           arch: win64_msvc2019_64
+          cache: true
       - run: |
           $p = '3rd/FluentUIStyle/fluentui3style/fluentui3style.cpp'
           $t = [IO.File]::ReadAllText($p)
@@ -35,6 +41,8 @@ jobs:
         shell: pwsh
   full:
     runs-on: windows-2022
+    env:
+      VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
     steps:
       - uses: actions/checkout@v4
         with:
@@ -47,6 +55,7 @@ jobs:
           host: windows
           target: desktop
           arch: win64_msvc2019_64
+          cache: true
       - run: |
           $vcpkg = $env:VCPKG_INSTALLATION_ROOT
           if (-not $vcpkg) { $vcpkg = 'C:\vcpkg' }
