@@ -489,6 +489,13 @@ if(WIN32)
             $<IF:$<CONFIG:Debug>,--debug,--release>
             $<TARGET_FILE:${PROGNAME}>)
 
+    if(WITH_FLUENT_UI)
+        add_custom_command(TARGET ${PROGNAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROGNAME}>/styles
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:FluentUI3StylePlugin> $<TARGET_FILE_DIR:${PROGNAME}>/styles)
+        install(TARGETS FluentUI3StylePlugin RUNTIME DESTINATION styles LIBRARY DESTINATION styles COMPONENT Runtime)
+    endif()
+
     # We have to copy the license file in the configuration phase.
     # CMake checks that CPACK_RESOURCE_FILE_LICENSE actually exists and
     # we have to copy it because WiX needs it to have a .txt extension.

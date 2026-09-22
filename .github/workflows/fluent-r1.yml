@@ -1,0 +1,78 @@
+name: Fluent R1 proof
+on:
+  push:
+    paths:
+      - .github/workflows/fluent-r1.yml
+      - 3rd/FluentUIStyle
+      - CMakeLists.txt
+      - src/CMakeLists.txt
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: recursive
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: jurplel/install-qt-action@v3
+        with:
+          version: 6.2.4
+          host: windows
+          target: desktop
+          arch: win64_msvc2019_64
+          cache: true
+      - run: |
+          $p = '3rd/FluentUIStyle/fluentui3style/fluentui3style.cpp'
+          $t = [IO.File]::ReadAllText($p)
+          $m = [regex]::Match($t, '#if QT_VERSION >= QT_VERSION_CHECK\( 6, 0, 0 \)\r?\n(\s*if \( tab->position != QStyleOptionTab::TabPosition::Moving \))')
+          if (-not $m.Success) { throw 'anchor not found' }
+          [IO.File]::WriteAllText($p, $t.Replace($m.Value, $m.Value.Replace('6, 0, 0', '6, 6, 0')))
+        shell: pwsh
+      - run: cmake -S 3rd/FluentUIStyle -B build -DBUILD_EXAMPLES=OFF -DBUILD_FRAMELESS=OFF -DBUILD_QTCREATOR_PLUGIN=OFF -DFLUENTUI3STYLE_COPY_TO_QT_DIR=OFF
+        shell: pwsh
+      - run: cmake --build build --config Release
+        shell: pwsh
+  full:
+    runs-on: windows-2022
+    env:
+      VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
+      SCCACHE_GHA_ENABLED: "on"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: recursive
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: jurplel/install-qt-action@v3
+        with:
+          version: 6.2.4
+          host: windows
+          target: desktop
+          arch: win64_msvc2019_64
+          cache: true
+      - run: |
+          $vcpkg = $env:VCPKG_INSTALLATION_ROOT
+          if (-not $vcpkg) { $vcpkg = 'C:\vcpkg' }
+          echo "VCPKG_ROOT=$vcpkg" >> $env:GITHUB_ENV
+        shell: pwsh
+      - run: cmake -S . -B build-full -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF -DWITH_GUI_TESTS=OFF -DKPXC_FEATURE_DOCS=OFF -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+        shell: pwsh
+      - run: cmake --build build-full --config Release
+        shell: pwsh
+      - run: sccache --show-stats
+        shell: pwsh
+      - run: cmake --install build-full --config Release --prefix deploy
+        shell: pwsh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: keepassxc-fluent-windows
+          path: deploy/
+          retention-days: 14
