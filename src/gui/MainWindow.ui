@@ -1149,10 +1149,10 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Automatic</string>
+    <string>Automatic (Fluent)</string>
    </property>
    <property name="toolTip">
-    <string>Set Theme: Automatic</string>
+    <string>Set Theme: Automatic (Fluent)</string>
    </property>
   </action>
   <action name="actionThemeLight">
@@ -1160,10 +1160,10 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Light</string>
+    <string>Light (Fluent)</string>
    </property>
    <property name="toolTip">
-    <string>Set Theme: Light</string>
+    <string>Set Theme: Light (Fluent)</string>
    </property>
   </action>
   <action name="actionThemeDark">
@@ -1171,10 +1171,10 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Dark</string>
+    <string>Dark (Fluent)</string>
    </property>
    <property name="toolTip">
-    <string>Set Theme: Dark</string>
+    <string>Set Theme: Dark (Fluent)</string>
    </property>
   </action>
   <action name="actionThemeClassic">

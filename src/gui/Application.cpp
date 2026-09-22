@@ -35,7 +35,7 @@
 #include <QRegularExpression>
 #include <QSocketNotifier>
 #include <QStandardPaths>
-
+#include <QStyleFactory>
 #if defined(Q_OS_UNIX)
 #include <csignal>
 #include <sys/socket.h>
@@ -47,6 +47,11 @@ namespace
     constexpr int WaitTimeoutMSec = 150;
     const char BlockSizeProperty[] = "blockSize";
     int g_OriginalFontSize = 0;
+
+    QStyle* createFluentStyle()
+    {
+        return QStyleFactory::create("FluentUI3");
+    }
 } // namespace
 
 Application::Application(int& argc, char** argv)
@@ -174,16 +179,23 @@ void Application::applyTheme()
 #endif
     }
     QPixmapCache::clear();
-    if (appTheme == "light") {
-        auto* s = new LightStyle;
-        setPalette(s->standardPalette());
-        setStyle(s);
-        m_darkTheme = false;
-    } else if (appTheme == "dark") {
-        auto* s = new DarkStyle;
-        setPalette(s->standardPalette());
-        setStyle(s);
-        m_darkTheme = true;
+    if (appTheme == "light" || appTheme == "dark") {
+        auto* fluent = createFluentStyle();
+        if (fluent) {
+            setStyle(fluent);
+            setStyleSheet(QString());
+            m_darkTheme = appTheme == "dark";
+        } else if (appTheme == "light") {
+            auto* s = new LightStyle;
+            setPalette(s->standardPalette());
+            setStyle(s);
+            m_darkTheme = false;
+        } else {
+            auto* s = new DarkStyle;
+            setPalette(s->standardPalette());
+            setStyle(s);
+            m_darkTheme = true;
+        }
     } else {
         // Classic mode, don't check for dark theme on Windows
         // because Qt 5.x does not support it
