@@ -1,0 +1,26 @@
+name: Fluent R1 proof
+on:
+  push:
+    paths:
+      - .github/workflows/fluent-r1.yml
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: jurplel/install-qt-action@v3
+        with:
+          version: 6.2.4
+          host: windows
+          target: desktop
+          arch: win64_msvc2019_64
+      - run: git clone --branch 4.0 --depth 1 --recursive https://github.com/XHY-ChuJian/FluentUIStyle.git fluent-src
+        shell: pwsh
+      - run: cmake -S fluent-src -B build -DBUILD_EXAMPLES=OFF -DBUILD_FRAMELESS=OFF -DBUILD_QTCREATOR_PLUGIN=OFF -DFLUENTUI3STYLE_COPY_TO_QT_DIR=OFF
+        shell: pwsh
+      - run: cmake --build build --config Release
+        shell: pwsh
