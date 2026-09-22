@@ -1,0 +1,4 @@
+[submodule "3rd/FluentUIStyle"]
+	path = 3rd/FluentUIStyle
+	url = https://github.com/XHY-ChuJian/FluentUIStyle.git
+	shallow = true
