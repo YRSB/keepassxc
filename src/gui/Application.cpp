@@ -26,6 +26,9 @@
 #include "gui/osutils/OSUtils.h"
 #include "gui/styles/dark/DarkStyle.h"
 #include "gui/styles/light/LightStyle.h"
+#ifdef WITH_FLUENT_UI
+#include "fluentui3style.h"
+#endif
 
 #include <QFileInfo>
 #include <QFileOpenEvent>
@@ -50,7 +53,11 @@ namespace
 
     QStyle* createFluentStyle()
     {
+#ifdef WITH_FLUENT_UI
+        return new FluentUI3Style;
+#else
         return QStyleFactory::create("FluentUI3");
+#endif
     }
 } // namespace
 

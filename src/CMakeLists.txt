@@ -490,10 +490,11 @@ if(WIN32)
             $<TARGET_FILE:${PROGNAME}>)
 
     if(WITH_FLUENT_UI)
+        target_link_libraries(keepassxc_gui PRIVATE FluentUI3Style)
+        target_compile_definitions(keepassxc_gui PRIVATE WITH_FLUENT_UI)
         add_custom_command(TARGET ${PROGNAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROGNAME}>/styles
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:FluentUI3StylePlugin> $<TARGET_FILE_DIR:${PROGNAME}>/styles)
-        install(TARGETS FluentUI3StylePlugin RUNTIME DESTINATION styles LIBRARY DESTINATION styles COMPONENT Runtime)
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:FluentUI3Style> $<TARGET_FILE_DIR:${PROGNAME}>)
+        install(FILES $<TARGET_FILE:FluentUI3Style> DESTINATION ${BIN_INSTALL_DIR} COMPONENT Runtime)
     endif()
 
     # We have to copy the license file in the configuration phase.
